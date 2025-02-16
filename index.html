@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Фитнес трекер: Duolingo стиль</title>
+  <!-- Подключаем шрифт Nunito для дружелюбного вида -->
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet" />
+  <style>
+    /* Базовый сброс и типографика */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f7f9f8;
+      color: #333;
+    }
+    header {
+      background: #7ac142;
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+    }
+    nav a.active {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+    .card p {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    /* Стили для круглого таймера */
+    .timer {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+    }
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+    .progress-ring__circle {
+      transition: stroke-dashoffset 1s linear;
+      transform-origin: center;
+    }
+    .timer-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: #7ac142;
+    }
+    /* Кнопки в стиле Duolingo */
+    .btn {
+      padding: 12px 28px;
+      margin: 8px 4px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      transition: background 0.3s;
+    }
+    .btn-primary {
+      background: #7ac142;
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #6aa639;
+    }
+    .btn-secondary {
+      background: #f7b500;
+      color: #fff;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #e0a900;
+    }
+    .btn-danger {
+      background: #e74c3c;
+      color: #fff;
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: #cf3e33;
+    }
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .hidden {
+      display: none;
+    }
+    ul.history-list {
+      list-style: none;
+      padding: 0;
+    }
+    ul.history-list li {
+      background: #fff;
+      margin-bottom: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+  <!-- Подключаем библиотеку canvas-confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Фитнес трекер</h1>
+    <nav>
+      <a href="#exercise" id="navExercise" class="active">Текущая неделя</a>
+      <a href="#history" id="navHistory">История</a>
+    </nav>
+  </header>
+  <main>
+    <!-- Вид для текущей недели -->
+    <div id="exerciseView">
+      <div class="card" id="exerciseCard">
+        <!-- Содержимое карточки упражнения будет генерироваться через JS -->
+      </div>
+    </div>
+    <!-- Вид с историей выполненных недель -->
+    <div id="historyView" class="hidden">
+      <div class="card">
+        <h2>История завершённых недель</h2>
+        <ul class="history-list" id="historyList">
+          <!-- История загружается из localStorage -->
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Звуковые эффекты -->
+  <audio id="finishSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+  <audio id="clickSound" src="https://www.soundjay.com/button/sounds/button-09.mp3" preload="auto"></audio>
+
+  <script>
+    /***********************\
+     * Массив упражнений
+    \***********************/
+    const exercises = [
+      {
+        id: 1,
+        name: "МФР стоп",
+        description:
+          "Прокатка стопы в течение 5 минут до снижения болезненных ощущений до 1-2 баллов.",
+        duration: 300, // 5 минут
+        type: "timer"
+      },
+      {
+        id: 2,
+        name: "МФР икроножной",
+        description: "Прокатка икроножной мышцы в течение 5 минут.",
+        duration: 300,
+        type: "timer"
+      },
+      {
+        id: 3,
+        name: "Подъём пальцев",
+        description:
+          "Подъем большого пальца отдельно, затем подъём 4-ех пальцев и отведение большого пальца – по 20 раз.",
+        type: "manual"
+      },
+      {
+        id: 4,
+        name: "Растяжка в выпаде",
+        description:
+          "Растяжка в выпаде (пятку не отрываем): 25 сек тянем, 10 сек отдыхаем – 3 подхода для каждой ноги.",
+        sets: 3,
+        work: 25,
+        rest: 10,
+        type: "interval"
+      },
+      {
+        id: 5,
+        name: "Дотягивание к стене",
+        description:
+          "Дотягивание к стене (пятки не отрываем): 25 сек тянем, 10 сек отдыхаем – 4 подхода.",
+        sets: 4,
+        work: 25,
+        rest: 10,
+        type: "interval"
+      }
+    ];
+
+    /***********************\
+     * Глобальные переменные
+    \***********************/
+    let currentExerciseIndex = 0;
+    let timerInterval = null;
+    let timerRemaining = 0;
+    let initialTime = 0; // для расчёта прогресса
+    let currentSet = 1;
+    let currentPhase = "work"; // для интервальных упражнений
+
+    // Параметры для SVG-круга
+    const radius = 90;
+    const circumference = 2 * Math.PI * radius;
+
+    const exerciseCard = document.getElementById("exerciseCard");
+
+    // Получаем аудиоэлементы
+    const finishSound = document.getElementById("finishSound");
+    const clickSound = document.getElementById("clickSound");
+
+    // Функция для проигрывания звука (если требуется)
+    function playSound(soundElement) {
+      soundElement.currentTime = 0;
+      soundElement.play();
+    }
+
+    // Функция для запуска конфетти (при завершении упражнения)
+    function launchConfetti() {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+
+    // Очищаем текущий таймер
+    function clearTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // Форматируем секунды в формат MM:SS
+    function formatTime(seconds) {
+      const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+      const s = String(seconds % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    // Обновляем анимацию круга
+    function updateProgress() {
+      const progress = timerRemaining / initialTime;
+      const offset = circumference * (1 - progress);
+      const circle = document.getElementById("progressCircle");
+      if (circle) {
+        circle.style.strokeDashoffset = offset;
+      }
+    }
+
+    /***********************\
+     * Рендеринг упражнения
+    \***********************/
+    function renderExercise() {
+      clearTimer();
+      if (currentExerciseIndex >= exercises.length) {
+        renderCompletion();
+        return;
+      }
+      const exercise = exercises[currentExerciseIndex];
+      let html = `<h2>${exercise.name}</h2>
+                  <p>${exercise.description}</p>`;
+
+      if (exercise.type === "timer" || exercise.type === "interval") {
+        if (exercise.type === "timer") {
+          timerRemaining = exercise.duration;
+          initialTime = exercise.duration;
+        } else if (exercise.type === "interval") {
+          currentSet = 1;
+          currentPhase = "work";
+          timerRemaining = exercise.work;
+          initialTime = exercise.work;
+        }
+        html += `<div class="timer" id="timerContainer">
+                   <svg class="progress-ring" width="200" height="200">
+                     <circle id="progressCircle"
+                             class="progress-ring__circle"
+                             stroke="#7ac142"
+                             stroke-width="8"
+                             fill="transparent"
+                             r="${radius}"
+                             cx="100" cy="100"
+                             stroke-dasharray="${circumference}"
+                             stroke-dashoffset="0"/>
+                   </svg>
+                   <div class="timer-text" id="timerText">${formatTime(timerRemaining)}</div>
+                 </div>
+                 <button class="btn btn-primary" id="startBtn">Старт</button>
+                 <button class="btn btn-secondary" id="pauseBtn" disabled>Пауза</button>
+                 <button class="btn btn-danger" id="skipBtn">Пропустить</button>`;
+      } else if (exercise.type === "manual") {
+        html += `<div style="text-align:center; margin:20px 0;">
+                   <button class="btn btn-primary" id="completeBtn">Завершить упражнение</button>
+                   <button class="btn btn-danger" id="skipBtn">Пропустить</button>
+                 </div>`;
+      }
+      exerciseCard.innerHTML = html;
+      attachEventListeners();
+      if (exercise.type === "timer" || exercise.type === "interval") {
+        updateProgress();
+      }
+    }
+
+    // Прикрепляем обработчики к кнопкам
+    function attachEventListeners() {
+      const exercise = exercises[currentExerciseIndex];
+      const startBtn = document.getElementById("startBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const skipBtn = document.getElementById("skipBtn");
+      const completeBtn = document.getElementById("completeBtn");
+
+      if (startBtn) {
+        startBtn.addEventListener("click", () => {
+          playSound(clickSound);
+          startBtn.disabled = true;
+          if (pauseBtn) pauseBtn.disabled = false;
+          if (exercise.type === "timer") {
+            startTimer();
+          } else if (exercise.type === "interval") {
+            startIntervalTimer();
+          }
+        });
+      }
+      if (pauseBtn) {
+        pauseBtn.addEventListener("click", () => {
+          playSound(clickSound);
+          clearTimer();
+          startBtn.disabled = false;
+          pauseBtn.disabled = true;
+        });
+      }
+      if (skipBtn) {
+        skipBtn.addEventListener("click", () => {
+          playSound(clickSound);
+          clearTimer();
+          markExercise("пропущено");
+          nextExercise();
+        });
+      }
+      if (completeBtn) {
+        completeBtn.addEventListener("click", () => {
+          playSound(clickSound);
+          markExercise("завершено");
+          nextExercise();
+        });
+      }
+    }
+
+    /***********************\
+     * Функции таймера
+    \***********************/
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        document.getElementById("timerText").textContent = formatTime(timerRemaining);
+        updateProgress();
+        if (timerRemaining <= 0) {
+          playSound(finishSound);
+          clearTimer();
+          markExercise("завершено");
+          nextExercise();
+        }
+      }, 1000);
+    }
+
+    function startIntervalTimer() {
+      const exercise = exercises[currentExerciseIndex];
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        document.getElementById("timerText").textContent = formatTime(timerRemaining);
+        updateProgress();
+        if (timerRemaining <= 0) {
+          playSound(finishSound);
+          clearTimer();
+          if (currentPhase === "work") {
+            if (exercise.rest > 0) {
+              currentPhase = "rest";
+              timerRemaining = exercise.rest;
+              initialTime = exercise.rest;
+            } else {
+              if (currentSet < exercise.sets) {
+                currentSet++;
+                currentPhase = "work";
+                timerRemaining = exercise.work;
+                initialTime = exercise.work;
+              } else {
+                markExercise("завершено");
+                nextExercise();
+                return;
+              }
+            }
+          } else {
+            if (currentSet < exercise.sets) {
+              currentSet++;
+              currentPhase = "work";
+              timerRemaining = exercise.work;
+              initialTime = exercise.work;
+            } else {
+              markExercise("завершено");
+              nextExercise();
+              return;
+            }
+          }
+          startIntervalTimer();
+        }
+      }, 1000);
+    }
+
+    // Отмечаем упражнение как завершённое или пропущенное; при завершении запускаем конфетти
+    function markExercise(status) {
+      console.log(`Упражнение "${exercises[currentExerciseIndex].name}" отмечено как ${status}.`);
+      if (status === "завершено") {
+        launchConfetti();
+      }
+    }
+
+    // Переход к следующему упражнению
+    function nextExercise() {
+      currentExerciseIndex++;
+      renderExercise();
+    }
+
+    /***********************\
+     * Финальный экран недели
+    \***********************/
+    function renderCompletion() {
+      clearTimer();
+      const html = `<h2>Неделя завершена!</h2>
+                    <p>Вы успешно прошли все упражнения.</p>
+                    <button class="btn btn-primary" id="saveWeekBtn">Сохранить неделю</button>
+                    <button class="btn btn-secondary" id="newWeekBtn">Начать новую неделю</button>`;
+      exerciseCard.innerHTML = html;
+      // Можно запустить конфетти и здесь для финального эффекта
+      launchConfetti();
+      document.getElementById("saveWeekBtn").addEventListener("click", saveWeek);
+      document.getElementById("newWeekBtn").addEventListener("click", resetWeek);
+    }
+
+    function saveWeek() {
+      const weekData = {
+        date: new Date().toLocaleString(),
+        exercises: exercises.map(ex => ({ name: ex.name }))
+      };
+      let history = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+      history.push(weekData);
+      localStorage.setItem("exerciseHistory", JSON.stringify(history));
+      alert("Неделя сохранена!");
+      renderHistory();
+    }
+
+    function resetWeek() {
+      currentExerciseIndex = 0;
+      clearTimer();
+      renderExercise();
+    }
+
+    /***********************\
+     * Навигация между экранами
+    \***********************/
+    const navExercise = document.getElementById("navExercise");
+    const navHistory = document.getElementById("navHistory");
+    const exerciseView = document.getElementById("exerciseView");
+    const historyView = document.getElementById("historyView");
+
+    navExercise.addEventListener("click", (e) => {
+      e.preventDefault();
+      navExercise.classList.add("active");
+      navHistory.classList.remove("active");
+      exerciseView.classList.remove("hidden");
+      historyView.classList.add("hidden");
+    });
+    navHistory.addEventListener("click", (e) => {
+      e.preventDefault();
+      navHistory.classList.add("active");
+      navExercise.classList.remove("active");
+      exerciseView.classList.add("hidden");
+      historyView.classList.remove("hidden");
+      renderHistory();
+    });
+
+    function renderHistory() {
+      const historyList = document.getElementById("historyList");
+      let history = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+      if (history.length === 0) {
+        historyList.innerHTML = "<li>Нет сохраненных недель.</li>";
+      } else {
+        historyList.innerHTML = "";
+        history.forEach((week, index) => {
+          const li = document.createElement("li");
+          li.textContent = `Неделя ${index + 1} — ${week.date}`;
+          historyList.appendChild(li);
+        });
+      }
+    }
+
+    // Инициализация
+    renderExercise();
+  </script>
+</body>
+</html>

@@ -2,106 +2,177 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Фитнес трекер: Duolingo стиль</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Фитнес трекер: Duolingo стиль (Адаптивный)</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
   <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
   <style>
     /* Сброс и базовые стили */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      font-size: 16px; /* Базовый размер шрифта */
+    }
     body {
       font-family: 'Nunito', sans-serif;
       background: #f7f9f8;
       color: #333;
       line-height: 1.6;
+      min-height: 100vh; /* Минимальная высота для всего экрана */
+      display: flex;
+      flex-direction: column; /* Чтобы footer (если будет) прижался вниз */
     }
     header {
       background: #7ac142;
-      padding: 15px 20px;
+      padding: 1rem 1.25rem; /* Используем rem для масштабируемости */
       text-align: center;
       color: #fff;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
     }
-    header h1 { font-size: 26px; margin-bottom: 8px; }
-    nav { margin-top: 8px; }
+    header h1 {
+      font-size: 1.625rem; /* 26px / 16px */
+      margin-bottom: 0.5rem; /* 8px / 16px */
+    }
+    nav {
+      margin-top: 0.5rem;
+    }
     nav a {
-      margin: 0 10px;
+      margin: 0 0.625rem; /* 10px / 16px */
       text-decoration: none;
       color: #fff;
       font-weight: 700;
-      padding: 5px 0;
+      padding: 0.3125rem 0; /* 5px / 16px */
       border-bottom: 2px solid transparent;
       transition: border-color 0.3s ease;
     }
-    nav a.active { border-bottom-color: #fff; }
+    nav a.active {
+      border-bottom-color: #fff;
+    }
     main {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 0 15px 20px;
+      /* Убираем max-width, чтобы контент занимал доступную ширину */
+      width: 100%;
+      /* Центрируем внутренний контейнер */
+      display: flex;
+      justify-content: center;
+      padding: 1.25rem 0.625rem; /* 20px 10px */
+      flex-grow: 1; /* Занимает оставшееся пространство */
+    }
+    /* Добавляем внутренний контейнер для ограничения ширины на больших экранах */
+    .content-wrapper {
+        max-width: 700px;
+        width: 100%; /* Занимает всю ширину main, но не более max-width */
     }
     .card {
       background: #fff;
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 1rem; /* 16px */
+      padding: 1.25rem; /* 20px */
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
+      margin-bottom: 1.25rem; /* 20px */
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
     .card h2 {
-      margin-bottom: 12px;
-      font-size: 22px;
+      margin-bottom: 0.75rem; /* 12px */
+      font-size: 1.375rem; /* 22px */
       color: #58a700;
     }
-    .card p { margin-bottom: 15px; }
+    .card p {
+      margin-bottom: 0.9375rem; /* 15px */
+      font-size: 1rem; /* 16px */
+    }
     .exercise-progress {
       text-align: center;
-      margin-bottom: 15px;
-      font-size: 14px;
+      margin-bottom: 0.9375rem; /* 15px */
+      font-size: 0.875rem; /* 14px */
       color: #888;
     }
     .status-indicator {
-       text-align: center;
-       margin-bottom: 10px;
-       font-weight: bold;
-       color: #7ac142;
-       min-height: 1.2em;
+        text-align: center;
+        margin-bottom: 0.625rem; /* 10px */
+        font-weight: bold;
+        color: #7ac142;
+        min-height: 1.2em; /* Чтобы не прыгало при появлении текста */
+        font-size: 0.875rem; /* 14px */
     }
+
+    /* --- Адаптивный Таймер --- */
     .timer {
       position: relative;
-      width: 180px;
-      height: 180px;
-      margin: 0 auto 20px;
+      /* Задаем ширину через max-width и width 100% */
+      max-width: 180px; /* Максимальный размер */
+      width: 60%;      /* Занимает % от родителя, но не более max-width */
+      margin: 0 auto 1.25rem; /* Центрирование и нижний отступ */
+      /* Используем aspect-ratio для поддержания формы круга */
+      aspect-ratio: 1 / 1;
     }
-    .progress-ring { transform: rotate(-90deg); }
-    .progress-ring__background { stroke: #e6e6e6; stroke-width: 8; fill: transparent; }
+    .timer svg {
+      /* SVG занимает весь контейнер .timer */
+      display: block; /* Убирает лишний отступ снизу */
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg); /* Поворот для начала сверху */
+    }
+    .progress-ring__background,
+    .progress-ring__circle {
+      /* Используем векторные единицы для радиуса и толщины */
+      /* cx, cy, r задаются относительно viewBox */
+      stroke-width: 8; /* Толщина линии */
+      fill: transparent;
+    }
+    .progress-ring__background {
+      stroke: #e6e6e6;
+    }
     .progress-ring__circle {
       stroke: #7ac142;
-      stroke-width: 8;
-      fill: transparent;
-      stroke-dasharray: 502.65; /* 2 * PI * 80 */
-      stroke-dashoffset: 502.65;
-      transition: stroke-dashoffset 0.5s linear;
-      transform-origin: center;
+      /* stroke-dasharray и stroke-dashoffset будут управляться JS */
+      transition: stroke-dashoffset 0.5s linear, stroke 0.3s ease; /* Плавный переход цвета */
+      transform-origin: center; /* Для возможных трансформаций */
     }
-    .progress-ring__circle--rest { stroke: #f7b500 !important; }
+    .progress-ring__circle--rest {
+      stroke: #f7b500 !important; /* Оранжевый для отдыха */
+    }
     .timer-text {
       position: absolute;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 32px;
+      /* Размер шрифта зависит от размера таймера - можно использовать vw или оставить rem/px */
+      font-size: 2rem; /* 32px */
       color: #7ac142;
       font-weight: bold;
+      transition: color 0.3s ease; /* Плавный переход цвета */
     }
-    .timer-text--rest { color: #f7b500 !important; }
+    .timer-text--rest {
+      color: #f7b500 !important; /* Оранжевый для отдыха */
+    }
+    /* --- Конец стилей Таймера --- */
+
     /* Кнопки */
+    .button-container { /* Добавляем контейнер для кнопок */
+        text-align: center;
+        margin-top: 1rem;
+    }
     .btn {
-      padding: 10px 24px; margin: 8px 4px; border: none;
-      border-bottom: 4px solid transparent; border-radius: 20px;
-      cursor: pointer; font-size: 16px; font-weight: 700;
+      padding: 0.625rem 1.5rem; /* 10px 24px */
+      margin: 0.5rem 0.25rem; /* 8px 4px */
+      border: none;
+      border-bottom: 4px solid transparent;
+      border-radius: 1.25rem; /* 20px */
+      cursor: pointer;
+      font-size: 1rem; /* 16px */
+      font-weight: 700;
       transition: background 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
       text-transform: uppercase;
+      display: inline-block; /* Чтобы margin работал корректно */
+      vertical-align: top; /* Выравнивание, если кнопки разной высоты */
     }
-    .btn:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 2px; }
+    .btn:active:not(:disabled) {
+      transform: translateY(2px);
+      border-bottom-width: 2px;
+    }
     .btn-primary { background: #7ac142; color: #fff; border-color: #58a700; }
     .btn-primary:hover:not(:disabled) { background: #85d04a; }
     .btn-secondary { background: #f7b500; color: #fff; border-color: #d99f00; }
@@ -109,39 +180,41 @@
     .btn-danger { background: #e74c3c; color: #fff; border-color: #c0392b; }
     .btn-danger:hover:not(:disabled) { background: #ec5b4b; }
     .btn:disabled { background: #e0e0e0; color: #a0a0a0; border-color: #c0c0c0; cursor: not-allowed; }
+
     /* Утилиты */
     .hidden { display: none; }
     .fade-out { opacity: 0; transform: scale(0.95); }
 
     /* --- Стили для Истории --- */
-    #historyView .card { padding-bottom: 10px; } /* Уменьшим отступ снизу у карточек истории */
-    .statistics-card { /* Карточка статистики */
+    #historyView .card { padding-bottom: 0.625rem; } /* 10px */
+    .statistics-card {
         background-color: #eef;
-        padding: 15px;
-        border-radius: 12px;
-        margin-bottom: 20px;
+        padding: 1rem; /* 16px */
+        border-radius: 0.75rem; /* 12px */
+        margin-bottom: 1.25rem; /* 20px */
     }
     .statistics-card h3 {
-        margin-bottom: 10px;
-        font-size: 18px;
+        margin-bottom: 0.625rem; /* 10px */
+        font-size: 1.125rem; /* 18px */
         color: #336;
         text-align: center;
     }
     .statistics-grid {
         display: grid;
+        /* auto-fit создает столько колонок, сколько поместится с minmax(120px, 1fr) */
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 10px;
+        gap: 0.625rem; /* 10px */
         text-align: center;
     }
-    .stat-item p { margin: 0; font-size: 14px; color: #557; }
-    .stat-item span { font-size: 20px; font-weight: bold; color: #336; }
+    .stat-item p { margin: 0; font-size: 0.875rem; color: #557; } /* 14px */
+    .stat-item span { font-size: 1.25rem; font-weight: bold; color: #336; } /* 20px */
 
-    .history-weeks-container { /* Контейнер для недель */
-        margin-top: 20px;
+    .history-weeks-container {
+        margin-top: 1.25rem; /* 20px */
     }
-    .week-entry { /* Запись одной недели */
-        margin-bottom: 25px;
-        padding-bottom: 15px;
+    .week-entry {
+        margin-bottom: 1.5rem; /* 24px */
+        padding-bottom: 1rem; /* 16px */
         border-bottom: 1px solid #eee;
     }
     .week-entry:last-child {
@@ -152,60 +225,145 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: 0.625rem; /* 10px */
     }
     .week-header span {
-        font-size: 14px;
+        font-size: 0.875rem; /* 14px */
         font-weight: bold;
         color: #555;
     }
-     .week-day-names { /* Названия дней недели */
+    .week-day-names {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 4px;
         margin-bottom: 4px;
         text-align: center;
-        font-size: 11px;
+        font-size: 0.75rem; /* 12px */
         color: #888;
     }
-    .week-squares { /* Контейнер для квадратиков */
+    .week-squares {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(7, 1fr); /* 7 одинаковых колонок */
         gap: 4px; /* Расстояние между квадратиками */
     }
-    .day-square { /* Квадратик дня */
-        width: 100%;
-        padding-bottom: 100%; /* Создает квадратный аспект */
+    .day-square {
+        /* Используем aspect-ratio для квадрата */
+        aspect-ratio: 1 / 1;
+        width: 100%; /* Занимает всю ширину колонки grid */
         background-color: #e0e0e0; /* Серый по умолчанию */
         border-radius: 4px;
-        position: relative; /* Для возможного добавления текста/иконок */
+        position: relative;
         transition: background-color 0.3s ease;
     }
-    .day-square.completed { /* Завершенный день */
+    .day-square.completed {
         background-color: #7ac142; /* Зеленый */
     }
     .no-history {
         text-align: center;
         color: #888;
-        margin-top: 20px;
+        margin-top: 1.25rem; /* 20px */
+        font-size: 0.9rem;
     }
     /* --- Конец стилей для Истории --- */
 
-    /* Адаптивность */
-    @media (max-width: 600px) {
-      .timer { width: 150px; height: 150px; }
-      .timer-text { font-size: 28px; }
-      header h1 { font-size: 22px; }
-      .btn { font-size: 14px; padding: 10px 18px; }
-      .card { padding: 15px; }
-      main { padding: 0 10px 15px; }
-      .week-day-names { font-size: 9px; }
-      .week-squares { gap: 3px; }
-      .day-square { border-radius: 3px; }
-      .statistics-grid { grid-template-columns: 1fr 1fr; } /* 2 колонки на мобильных */
+    /* --- Адаптивность --- */
+
+    /* Планшеты и маленькие десктопы (например, > 600px) */
+    @media (min-width: 601px) {
+        .timer {
+            width: 40%; /* Немного больше на экранах пошире */
+        }
+        .timer-text {
+            font-size: 2.25rem; /* 36px */
+        }
+         .statistics-grid {
+            /* Позволяем больше колонок на широких экранах */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
     }
+
+    /* Маленькие экраны (например, <= 600px) - основные мобильные стили */
+    @media (max-width: 600px) {
+        html {
+            font-size: 15px; /* Слегка уменьшаем базовый шрифт */
+        }
+        header h1 {
+            font-size: 1.375rem; /* 22px / 15px ~ 1.46rem, округляем */
+        }
+        nav a {
+            margin: 0 0.5rem;
+        }
+        .card {
+            padding: 1rem; /* 15px */
+            border-radius: 0.75rem; /* 12px */
+        }
+        .card h2 {
+             font-size: 1.25rem; /* ~19px */
+        }
+        .timer {
+            max-width: 150px; /* Уменьшаем максимальный размер */
+            width: 55%;      /* Можно оставить % или задать фиксированный */
+        }
+        .timer-text {
+            font-size: 1.875rem; /* 28px / 15px ~ 1.86rem */
+        }
+        .btn {
+            font-size: 0.93rem; /* ~14px */
+            padding: 0.6rem 1.1rem; /* ~9px 16.5px */
+            border-radius: 1rem; /* ~15px */
+        }
+        .week-day-names {
+            font-size: 0.67rem; /* ~10px */
+        }
+        .week-squares {
+            gap: 3px;
+        }
+        .day-square {
+            border-radius: 3px;
+        }
+        .statistics-grid {
+            /* Можно оставить auto-fit или жестко задать 2 колонки */
+             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            /* или grid-template-columns: 1fr 1fr; */
+        }
+         .status-indicator {
+             font-size: 0.8rem; /* ~12px */
+         }
+    }
+
+     /* Очень маленькие экраны (например, <= 400px) */
+    @media (max-width: 400px) {
+         html {
+            font-size: 14px; /* Еще немного уменьшаем */
+        }
+         header h1 {
+            font-size: 1.2rem; /* ~17px */
+        }
+        .timer {
+            max-width: 120px;
+            width: 50%;
+        }
+         .timer-text {
+            font-size: 1.6rem; /* ~22px */
+        }
+        .btn {
+            padding: 0.5rem 1rem; /* ~7px 14px */
+            font-size: 0.85rem; /* ~12px */
+        }
+         .week-day-names {
+            font-size: 0.6rem; /* ~8.5px */
+        }
+        .statistics-grid {
+             /* Можно жестко задать 1 или 2 колонки */
+             grid-template-columns: 1fr; /* Одна колонка */
+             gap: 0.5rem;
+        }
+        .stat-item span {
+            font-size: 1.1rem; /* ~15px */
+        }
+    }
+
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <header>
@@ -217,46 +375,54 @@
   </header>
 
   <main>
-    <div id="exerciseView">
-      <div class="card" id="exerciseCard"></div>
-    </div>
-    <div id="historyView" class="hidden">
-      <div class="card statistics-card" id="statisticsCard">
-         </div>
-      <div class="card">
-        <h2>История тренировок</h2>
-        <div class="history-weeks-container" id="historyWeeksContainer">
+    <div class="content-wrapper">
+        <div id="exerciseView">
+          <div class="card" id="exerciseCard">
+              <p style="text-align: center; color: #888;">Загрузка упражнения...</p>
           </div>
-      </div>
-    </div>
-  </main>
+        </div>
+        <div id="historyView" class="hidden">
+          <div class="card statistics-card" id="statisticsCard">
+             <h3>Статистика</h3>
+             <p class="no-history">Загрузка статистики...</p>
+          </div>
+          <div class="card">
+            <h2>История тренировок</h2>
+            <div class="history-weeks-container" id="historyWeeksContainer">
+              <p class="no-history">Загрузка истории...</p>
+            </div>
+          </div>
+        </div>
+    </div></main>
 
-  <audio id="finishSound" preload="auto" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
-  <audio id="clickSound" preload="auto" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
-  <audio id="transitionSound" preload="auto" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
-  <audio id="restSound" preload="auto" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+  <audio id="finishSound" preload="auto" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" aria-hidden="true"></audio>
+  <audio id="clickSound" preload="auto" src="https://www.soundjay.com/button/sounds/button-09.mp3" aria-hidden="true"></audio>
+  <audio id="transitionSound" preload="auto" src="https://www.soundjay.com/button/sounds/button-10.mp3" aria-hidden="true"></audio>
+  <audio id="restSound" preload="auto" src="https://www.soundjay.com/button/sounds/button-16.mp3" aria-hidden="true"></audio>
 
   <script>
     // --- Массив упражнений (без изменений) ---
     const exercises = [
-      { id: 1, name: "МФР стоп", description: "Прокатка стопы в течение 5 минут...", duration: 300, type: "timer" },
-      { id: 2, name: "МФР икроножной", description: "Прокатка икроножной мышцы в течение 5 минут.", duration: 300, type: "timer" },
-      { id: 3, name: "Подъём пальцев", description: "Подъем большого пальца отдельно...", type: "manual" },
-      { id: 4, name: "Растяжка в выпаде", description: "Растяжка в выпаде (пятку не отрываем): 25/10 сек, 3 подх./нога.", sets: 3, work: 25, rest: 10, legs: 2, type: "interval" },
-      { id: 5, name: "Дотягивание к стене", description: "Дотягивание к стене (пятки не отрываем): 25/10 сек, 4 подх.", sets: 4, work: 25, rest: 10, type: "interval" }
+      { id: 1, name: "МФР стоп", description: "Прокатка стопы массажным мячом или роллом.", duration: 300, type: "timer" },
+      { id: 2, name: "МФР икроножной", description: "Прокатка икроножной мышцы массажным роллом.", duration: 300, type: "timer" },
+      { id: 3, name: "Подъём пальцев", description: "Сядьте, стопы на полу. Поднимайте большой палец, удерживая остальные прижатыми. Затем наоборот.", type: "manual" },
+      { id: 4, name: "Растяжка в выпаде", description: "Встаньте в выпад, задняя нога прямая, пятка на полу. Держите 25 сек. Повторите 3 раза на каждую ногу с отдыхом 10 сек.", sets: 3, work: 25, rest: 10, legs: 2, type: "interval" },
+      { id: 5, name: "Дотягивание к стене", description: "Встаньте лицом к стене, руки на стене. Наклоняйтесь вперед, сгибая колени, пятки не отрывать. 25 сек работа / 10 сек отдых, 4 подхода.", sets: 4, work: 25, rest: 10, type: "interval" }
     ];
 
     // --- Глобальные переменные (без изменений) ---
     let currentExerciseIndex = 0;
     let timerInterval = null;
     let timerRemaining = 0;
-    let initialTime = 0;
+    let initialTime = 0; // Общее время для текущего сегмента (work/rest/duration)
     let currentSet = 1;
     let currentLeg = 1;
-    let currentPhase = "work";
+    let currentPhase = "work"; // 'work', 'rest'
     let isTimerPaused = false;
-    let interactionOccurred = false;
+    let interactionOccurred = false; // Для активации звука
 
+    // --- Константы для SVG таймера ---
+    // Радиус остается константой для расчетов в JS, т.к. viewBox не меняется
     const radius = 80;
     const circumference = 2 * Math.PI * radius;
 
@@ -264,132 +430,268 @@
     const exerciseCard = document.getElementById("exerciseCard");
     const exerciseView = document.getElementById("exerciseView");
     const historyView = document.getElementById("historyView");
-    const historyWeeksContainer = document.getElementById("historyWeeksContainer"); // Обновленный контейнер
-    const statisticsCard = document.getElementById("statisticsCard"); // Контейнер статистики
+    const historyWeeksContainer = document.getElementById("historyWeeksContainer");
+    const statisticsCard = document.getElementById("statisticsCard");
     const navExercise = document.getElementById("navExercise");
     const navHistory = document.getElementById("navHistory");
 
-    // --- Аудио элементы (без изменений) ---
-    const sounds = {
-        finish: document.getElementById("finishSound"),
-        click: document.getElementById("clickSound"),
-        transition: document.getElementById("transitionSound"),
-        rest: document.getElementById("restSound")
-    };
+    // --- Аудио элементы ---
+    // Используем try-catch на случай, если элемент не найден
+    const sounds = {};
+    try {
+        sounds.finish = document.getElementById("finishSound");
+        sounds.click = document.getElementById("clickSound");
+        sounds.transition = document.getElementById("transitionSound");
+        sounds.rest = document.getElementById("restSound");
+    } catch (e) {
+        console.error("Ошибка при получении аудио элементов:", e);
+    }
 
-    // --- Функции (Звук, Конфетти, Таймер - без существенных изменений) ---
-    function playSound(soundElement) { /* ... без изменений ... */
-        if (!soundElement) return;
-        soundElement.currentTime = 0;
+    // --- Функции ---
+
+    /**
+     * Воспроизводит звуковой элемент с обработкой ошибок.
+     * @param {HTMLAudioElement} soundElement - Аудио элемент для воспроизведения.
+     */
+    function playSound(soundElement) {
+        // Не играть, если нет элемента или звук еще не активирован (кроме самой активации)
+        if (!soundElement || !interactionOccurred) return;
+        soundElement.currentTime = 0; // Начать с начала
         const playPromise = soundElement.play();
         if (playPromise !== undefined) {
-            playPromise.catch(error => console.error("Ошибка воспроизведения звука:", error));
+            playPromise.catch(error => {
+                // Игнорируем ошибку прерывания, но логируем другие ошибки
+                if (error.name !== 'AbortError') {
+                    console.error("Ошибка воспроизведения звука:", error);
+                }
+            });
         }
     }
-    function launchConfetti() { /* ... без изменений ... */
+
+    /** Запускает эффект конфетти. */
+    function launchConfetti() {
         if (typeof confetti === 'function') {
             confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, zIndex: 9999 });
-        } else { console.warn("Библиотека confetti не загружена."); }
+        } else {
+            console.warn("Библиотека confetti не загружена.");
+        }
     }
-    function clearTimer() { /* ... без изменений ... */
-        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+    /** Очищает интервал таймера. */
+    function clearTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
     }
-    function formatTime(seconds) { /* ... без изменений ... */
+
+    /**
+     * Форматирует секунды в строку MM:SS.
+     * @param {number} seconds - Количество секунд.
+     * @returns {string} - Время в формате MM:SS.
+     */
+    function formatTime(seconds) {
         const m = String(Math.floor(seconds / 60)).padStart(2, "0");
         const s = String(seconds % 60).padStart(2, "0");
         return `${m}:${s}`;
     }
-    function updateTimerDisplay() { /* ... без изменений ... */
+
+    /** Обновляет отображение таймера (текст и круг прогресса). */
+    function updateTimerDisplay() {
         const timerTextElement = document.getElementById("timerText");
         const circle = document.getElementById("progressCircle");
+        const timerContainer = document.getElementById("timerContainer"); // Получаем контейнер
+
         if (timerTextElement) {
             timerTextElement.textContent = formatTime(timerRemaining);
+            // Переключаем класс для цвета текста в зависимости от фазы
             timerTextElement.classList.toggle("timer-text--rest", currentPhase === 'rest');
         }
+
         if (circle) {
-            const progress = Math.max(0, timerRemaining / initialTime);
+            // Рассчитываем прогресс (от 0 до 1)
+            // Убедимся, что initialTime не равно 0, чтобы избежать деления на ноль
+            const progress = initialTime > 0 ? Math.max(0, timerRemaining / initialTime) : 0;
+            // Рассчитываем смещение штриха
             const offset = circumference * (1 - progress);
             circle.style.strokeDashoffset = offset;
+            // Переключаем класс для цвета круга в зависимости от фазы
             circle.classList.toggle("progress-ring__circle--rest", currentPhase === 'rest');
         }
+
+        // Обновляем индикатор статуса (подходы/ноги/фаза)
         updateStatusIndicator();
     }
-     function updateStatusIndicator() { /* ... без изменений ... */
+
+    /** Обновляет текстовый индикатор статуса для интервальных упражнений. */
+    function updateStatusIndicator() {
         const statusElement = document.getElementById("statusIndicator");
-        if (!statusElement) return;
+        if (!statusElement) return; // Выходим, если элемента нет
+
         const exercise = exercises[currentExerciseIndex];
+        // Показываем статус только для интервальных упражнений
         if (exercise?.type === "interval") {
             let statusText = `Подход: ${currentSet}/${exercise.sets}`;
-            if (exercise.legs && exercise.legs > 1) statusText += ` | Нога: ${currentLeg}/${exercise.legs}`;
+            // Добавляем информацию о ноге, если она есть
+            if (exercise.legs && exercise.legs > 1) {
+                statusText += ` | Нога: ${currentLeg}/${exercise.legs}`;
+            }
+            // Добавляем информацию о фазе (работа или отдых)
             statusText += currentPhase === "rest" ? ` | Отдых` : ` | Работа`;
             statusElement.textContent = statusText;
-        } else { statusElement.textContent = ''; }
-    }
-    function startTimer() { /* ... без изменений ... */
-        if (isTimerPaused || timerInterval) return;
-        timerInterval = setInterval(() => {
-            if (isTimerPaused) return;
-            timerRemaining--; updateTimerDisplay();
-            if (timerRemaining <= 0) {
-                clearTimer(); playSound(sounds.finish);
-                markExercise("завершено"); nextExercise();
-            }
-        }, 1000);
-    }
-     function startIntervalTimer() { /* ... без изменений ... */
-        if (isTimerPaused || timerInterval) return;
-        const exercise = exercises[currentExerciseIndex];
-        timerInterval = setInterval(() => {
-            if (isTimerPaused) return;
-            timerRemaining--; updateTimerDisplay();
-            if (timerRemaining <= 0) {
-                clearTimer();
-                if (currentPhase === "work") {
-                    if (exercise.rest > 0) {
-                        currentPhase = "rest"; timerRemaining = exercise.rest; initialTime = exercise.rest;
-                        playSound(sounds.rest); startIntervalTimer();
-                    } else { handleIntervalCompletion(); }
-                } else { handleIntervalCompletion(); }
-            }
-        }, 1000);
-    }
-    function handleIntervalCompletion() { /* ... без изменений ... */
-        const exercise = exercises[currentExerciseIndex];
-        const totalLegs = exercise.legs || 1;
-        if (currentSet < exercise.sets) {
-            currentSet++; currentPhase = "work"; timerRemaining = exercise.work; initialTime = exercise.work;
-            playSound(sounds.transition); startIntervalTimer();
         } else {
+            // Очищаем статус для других типов упражнений
+            statusElement.textContent = '';
+        }
+    }
+
+    /** Запускает обычный таймер (для упражнений типа "timer"). */
+    function startTimer() {
+        if (isTimerPaused || timerInterval) return; // Не запускать, если пауза или уже запущен
+
+        timerInterval = setInterval(() => {
+            if (isTimerPaused) return; // Ничего не делаем на паузе
+
+            timerRemaining--; // Уменьшаем оставшееся время
+            updateTimerDisplay(); // Обновляем отображение
+
+            // Если время вышло
+            if (timerRemaining <= 0) {
+                clearTimer(); // Останавливаем таймер
+                playSound(sounds.finish); // Звук завершения
+                markExercise("завершено"); // Отмечаем как завершенное
+                nextExercise(); // Переходим к следующему
+            }
+        }, 1000); // Интервал в 1 секунду
+    }
+
+    /** Запускает интервальный таймер (для упражнений типа "interval"). */
+    function startIntervalTimer() {
+        if (isTimerPaused || timerInterval) return;
+
+        const exercise = exercises[currentExerciseIndex];
+        if (!exercise) return; // На всякий случай
+
+        timerInterval = setInterval(() => {
+            if (isTimerPaused) return;
+
+            timerRemaining--;
+            updateTimerDisplay();
+
+            if (timerRemaining <= 0) {
+                clearTimer(); // Останавливаем текущий интервал
+
+                // Если закончилась фаза работы
+                if (currentPhase === "work") {
+                    // Если есть время отдыха, переходим в фазу отдыха
+                    if (exercise.rest > 0) {
+                        currentPhase = "rest";
+                        timerRemaining = exercise.rest;
+                        initialTime = exercise.rest; // Обновляем общее время для фазы
+                        playSound(sounds.rest); // Звук начала отдыха
+                        startIntervalTimer(); // Запускаем таймер для отдыха
+                    } else {
+                        // Если отдыха нет, сразу обрабатываем завершение подхода/ноги
+                        handleIntervalCompletion();
+                    }
+                } else { // Если закончилась фаза отдыха
+                    handleIntervalCompletion(); // Обрабатываем завершение
+                }
+            }
+        }, 1000);
+    }
+
+    /** Обрабатывает завершение фазы работы или отдыха в интервальном таймере. */
+    function handleIntervalCompletion() {
+        const exercise = exercises[currentExerciseIndex];
+        if (!exercise) return;
+
+        const totalLegs = exercise.legs || 1; // Количество ног (минимум 1)
+
+        // Проверяем, нужно ли переходить к следующему подходу на текущей ноге
+        if (currentSet < exercise.sets) {
+            currentSet++; // Следующий подход
+            currentPhase = "work"; // Начинаем с фазы работы
+            timerRemaining = exercise.work;
+            initialTime = exercise.work;
+            playSound(sounds.transition); // Звук перехода
+            startIntervalTimer(); // Запускаем таймер для работы
+        }
+        // Если все подходы на текущей ноге завершены
+        else {
+            // Проверяем, нужно ли переходить к следующей ноге
             if (currentLeg < totalLegs) {
-                currentLeg++; currentSet = 1; currentPhase = "work"; timerRemaining = exercise.work; initialTime = exercise.work;
-                playSound(sounds.transition); startIntervalTimer();
-            } else {
-                playSound(sounds.finish); markExercise("завершено"); nextExercise();
+                currentLeg++; // Следующая нога
+                currentSet = 1; // Сбрасываем счетчик подходов
+                currentPhase = "work";
+                timerRemaining = exercise.work;
+                initialTime = exercise.work;
+                playSound(sounds.transition);
+                startIntervalTimer();
+            }
+            // Если все подходы и все ноги завершены
+            else {
+                playSound(sounds.finish); // Звук завершения упражнения
+                markExercise("завершено"); // Отмечаем
+                nextExercise(); // Переходим к следующему
             }
         }
     }
-    function markExercise(status) { /* ... без изменений ... */
-        console.log(`Упражнение "${exercises[currentExerciseIndex]?.name || 'Неизвестное'}" отмечено как ${status}.`);
-        if (status === "завершено") { launchConfetti(); }
+
+    /**
+     * Отмечает статус выполнения упражнения (для логирования или будущей статистики).
+     * @param {'завершено' | 'пропущено'} status - Статус выполнения.
+     */
+    function markExercise(status) {
+        const exerciseName = exercises[currentExerciseIndex]?.name || 'Неизвестное упражнение';
+        console.log(`Упражнение "${exerciseName}" отмечено как ${status}.`);
+        // Запускаем конфетти только при успешном завершении
+        if (status === "завершено") {
+            launchConfetti();
+        }
     }
-    function nextExercise() { /* ... без изменений ... */
-        currentExerciseIndex++;
-        renderExercise();
+
+    /** Переходит к следующему упражнению или экрану завершения. */
+    function nextExercise() {
+        currentExerciseIndex++; // Увеличиваем индекс
+        renderExercise(); // Отображаем следующее или экран завершения
     }
-    function resetWeek() { /* ... без изменений ... */
-        playSound(sounds.click); currentExerciseIndex = 0; clearTimer(); renderExercise();
+
+    /** Сбрасывает прогресс и начинает тренировку заново. */
+    function resetWeek() {
+        // Не нужно вызывать playSound здесь, т.к. он вызывается в handleInteraction
+        currentExerciseIndex = 0; // Возвращаемся к первому упражнению
+        clearTimer(); // Останавливаем таймер, если он был запущен
+        renderExercise(); // Отображаем первое упражнение
     }
-    // Активация звука при первом взаимодействии
-    const activateSound = () => { /* ... без изменений ... */
+
+    /** Активирует возможность воспроизведения звука после первого взаимодействия пользователя. */
+    const activateSound = () => {
         if (!interactionOccurred) {
-             Object.values(sounds).forEach(sound => {
-                 if (sound) { sound.play().then(() => sound.pause()).catch(()=>{}); }
-             });
-             interactionOccurred = true;
+            console.log("Активация звука...");
+            interactionOccurred = true; // Устанавливаем флаг *перед* попыткой воспроизведения
+            // Пытаемся "разбудить" аудио контекст, тихо обрабатывая ошибки
+            Object.values(sounds).forEach(sound => {
+                if (sound) {
+                    const playPromise = sound.play();
+                    if(playPromise !== undefined) {
+                        playPromise.then(() => {
+                            // Успешно начали играть, ставим на паузу
+                            sound.pause();
+                            sound.currentTime = 0; // Сбрасываем на начало
+                        }).catch(() => {
+                            // Ошибку активации игнорируем, не выводим в консоль
+                        });
+                    }
+                }
+            });
+             // Дополнительно проверим, можно ли теперь играть звук клика
+             // Это нужно, чтобы звук клика сработал при *первом* же нажатии
+             playSound(sounds.click);
         }
     };
 
-    // --- Обновленные и новые функции ---
+    // --- Функции для Истории и Сохранения ---
 
     /**
      * Получает номер недели ISO 8601 для даты.
@@ -409,15 +711,37 @@
      * Получает дату начала недели (понедельник) для заданного года и номера недели.
      * @param {number} year - Год.
      * @param {number} weekNumber - Номер недели ISO.
-     * @returns {Date} - Дата понедельника этой недели.
+     * @returns {Date} - Дата понедельника этой недели (локальное время).
      */
     function getStartOfWeek(year, weekNumber) {
-        const d = new Date(Date.UTC(year, 0, 1 + (weekNumber - 1) * 7));
-        const dayOfWeek = d.getUTCDay() || 7; // Вс = 7
-        d.setUTCDate(d.getUTCDate() + 1 - dayOfWeek); // Сдвигаем на понедельник
-        // Возвращаем локальную дату, а не UTC
-        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        // Создаем дату для первого дня года
+        const firstDayOfYear = new Date(Date.UTC(year, 0, 1));
+        // Находим первый понедельник года или последней недели предыдущего
+        const daysToFirstMonday = (8 - (firstDayOfYear.getUTCDay() || 7)) % 7;
+        const firstMonday = new Date(firstDayOfYear);
+        firstMonday.setUTCDate(firstDayOfYear.getUTCDate() + daysToFirstMonday);
+
+        // Рассчитываем дату понедельника нужной недели
+        const targetMonday = new Date(firstMonday);
+        targetMonday.setUTCDate(firstMonday.getUTCDate() + (weekNumber - 1) * 7);
+
+         // Корректировка, если расчетная неделя 'перепрыгнула' год
+        if (targetMonday.getUTCFullYear() > year || (targetMonday.getUTCFullYear() === year && getWeekNumber(targetMonday)[1] !== weekNumber)) {
+             // Если первый день года - Пт, Сб, Вс, то первая неделя начинается позже
+             if (firstDayOfYear.getUTCDay() > 4 || firstDayOfYear.getUTCDay() === 0) {
+                  targetMonday.setUTCDate(targetMonday.getUTCDate() - 7);
+             }
+        }
+         // Корректировка, если 1 января - понедельник, вторник, среда или четверг
+         else if (getWeekNumber(targetMonday)[0] < year) {
+             targetMonday.setUTCDate(targetMonday.getUTCDate() + 7);
+         }
+
+
+        // Возвращаем локальную дату
+        return new Date(targetMonday.getUTCFullYear(), targetMonday.getUTCMonth(), targetMonday.getUTCDate());
     }
+
 
     /**
      * Получает день недели (0 для Пн, 6 для Вс).
@@ -425,41 +749,56 @@
      * @returns {number} - День недели (0-6).
      */
     function getDayOfWeek(date) {
-        const day = date.getDay();
-        return day === 0 ? 6 : day - 1; // Преобразуем Вс(0) -> 6, Пн(1) -> 0, ... Сб(6) -> 5
+        const day = date.getDay(); // 0 = Вс, 1 = Пн, ..., 6 = Сб
+        return day === 0 ? 6 : day - 1; // Преобразуем: Пн=0, ..., Вс=6
     }
 
-    /**
-     * Сохраняет информацию о завершении тренировки СЕГОДНЯ.
-     */
+    /** Сохраняет информацию о завершении тренировки СЕГОДНЯ в localStorage. */
     function saveCompletion() {
-        console.log("[Storage] Сохранение завершения тренировки...");
+        console.log("[Storage] Попытка сохранения завершения тренировки...");
         const today = new Date();
         const [year, weekNo] = getWeekNumber(today);
-        const dayOfWeek = getDayOfWeek(today); // 0 = Пн, 6 = Вс
-        const weekKey = `${year}-W${String(weekNo).padStart(2, '0')}`; // Формат ключа: "2025-W18"
+        const dayOfWeek = getDayOfWeek(today); // 0 = Пн, ..., 6 = Вс
+        const weekKey = `${year}-W${String(weekNo).padStart(2, '0')}`; // Формат ключа: "2024-W18"
 
         let history = {};
         try {
-            history = JSON.parse(localStorage.getItem("exerciseHistory")) || {};
+            const storedHistory = localStorage.getItem("exerciseHistory");
+            if (storedHistory) {
+                history = JSON.parse(storedHistory);
+                // Проверка, что это объект
+                if (typeof history !== 'object' || history === null) {
+                    console.warn("[Storage] Данные в localStorage повреждены, создается новая история.");
+                    history = {};
+                }
+            }
         } catch (e) {
-            console.error("Ошибка чтения истории из localStorage:", e);
-            history = {}; // Начинаем с чистого листа в случае ошибки
+            console.error("[Storage] Ошибка чтения истории из localStorage:", e);
+            history = {}; // Начинаем с чистого листа в случае ошибки парсинга
         }
 
         // Получаем или создаем запись для текущей недели
         if (!history[weekKey]) {
+            console.log(`[Storage] Создание записи для новой недели: ${weekKey}`);
             history[weekKey] = {
-                // Сохраняем дату начала недели для удобства отображения
+                // Сохраняем дату начала недели (понедельник)
                 startDate: getStartOfWeek(year, weekNo).toISOString().split('T')[0],
                 daysCompleted: [] // Массив с номерами завершенных дней (0-6)
             };
+        } else {
+             // Убедимся, что daysCompleted это массив
+             if (!Array.isArray(history[weekKey].daysCompleted)) {
+                 console.warn(`[Storage] Поле daysCompleted для недели ${weekKey} не является массивом. Исправлено.`);
+                 history[weekKey].daysCompleted = [];
+             }
         }
+
 
         // Добавляем текущий день недели в массив, если его там еще нет
         if (!history[weekKey].daysCompleted.includes(dayOfWeek)) {
             history[weekKey].daysCompleted.push(dayOfWeek);
             history[weekKey].daysCompleted.sort((a, b) => a - b); // Сортируем для порядка
+            console.log(`[Storage] День ${dayOfWeek} добавлен для недели ${weekKey}.`);
         } else {
             console.log(`[Storage] День ${dayOfWeek} для недели ${weekKey} уже был сохранен.`);
         }
@@ -467,282 +806,413 @@
         // Сохраняем обновленную историю
         try {
             localStorage.setItem("exerciseHistory", JSON.stringify(history));
-            console.log(`[Storage] День ${dayOfWeek} для недели ${weekKey} сохранен.`);
+            console.log(`[Storage] История успешно сохранена.`);
         } catch (e) {
-            console.error("Ошибка сохранения в localStorage:", e);
-            alert("Не удалось сохранить прогресс. Возможно, хранилище переполнено.");
+            console.error("[Storage] Ошибка сохранения в localStorage:", e);
+            // Можно показать пользователю сообщение об ошибке, если нужно
+            // alert("Не удалось сохранить прогресс. Возможно, хранилище переполнено.");
         }
     }
 
 
-    /**
-     * Рендеринг упражнения (без изменений в логике, только вызов attachEventListeners)
-     */
-     function renderExercise() {
-        clearTimer();
-        isTimerPaused = false;
-        exerciseCard.classList.add('fade-out');
+    /** Отображает текущее упражнение или экран завершения. */
+    function renderExercise() {
+        clearTimer(); // Очищаем предыдущий таймер
+        isTimerPaused = false; // Сбрасываем флаг паузы
+        exerciseCard.classList.add('fade-out'); // Начинаем анимацию исчезновения
 
+        // Небольшая задержка для анимации
         setTimeout(() => {
+            // Если индекс вышел за пределы массива упражнений
             if (currentExerciseIndex >= exercises.length) {
-                renderCompletion(); // Переход к экрану завершения
-                exerciseCard.classList.remove('fade-out');
-                return;
+                renderCompletion(); // Показываем экран завершения
+                exerciseCard.classList.remove('fade-out'); // Показываем карточку
+                return; // Выходим из функции
             }
 
             const exercise = exercises[currentExerciseIndex];
-            // Сброс состояния для интервального/таймерного упражнения
+            if (!exercise) { // Доп. проверка на случай ошибки
+                 console.error("Ошибка: Не найдено упражнение с индексом", currentExerciseIndex);
+                 // Можно показать сообщение об ошибке или перейти к следующему
+                 currentExerciseIndex++;
+                 renderExercise();
+                 return;
+            }
+
+            // Сброс состояния для нового упражнения
             if (exercise.type === "interval") {
                 currentSet = 1; currentLeg = 1; currentPhase = "work";
                 timerRemaining = exercise.work; initialTime = exercise.work;
             } else if (exercise.type === "timer") {
-                currentPhase = "work"; // Устанавливаем фазу для таймера
+                currentPhase = "work"; // У таймера только фаза "work"
                 timerRemaining = exercise.duration; initialTime = exercise.duration;
+            } else {
+                // Для 'manual' типа таймер не нужен
+                timerRemaining = 0; initialTime = 0;
             }
 
-            // Генерация HTML (остается прежней)
+            // --- Генерация HTML для карточки упражнения ---
             let html = `<div class="exercise-progress">Упражнение ${currentExerciseIndex + 1} из ${exercises.length}</div>
                         <h2>${exercise.name}</h2>
                         <p>${exercise.description}</p>`;
+
+            // Если упражнение с таймером (обычным или интервальным)
             if (exercise.type === "timer" || exercise.type === "interval") {
                 html += `<div class="status-indicator" id="statusIndicator"></div>
                          <div class="timer" id="timerContainer">
-                           <svg class="progress-ring" width="180" height="180" viewBox="0 0 180 180">
-                             <circle class="progress-ring__background" stroke="#e6e6e6" stroke-width="8" fill="transparent" r="${radius}" cx="90" cy="90"/>
-                             <circle id="progressCircle" class="progress-ring__circle" r="${radius}" cx="90" cy="90"/>
-                           </svg>
-                           <div class="timer-text" id="timerText">${formatTime(timerRemaining)}</div>
+                            <svg class="progress-ring" viewBox="0 0 180 180">
+                                <circle class="progress-ring__background" r="${radius}" cx="90" cy="90"/>
+                                <circle id="progressCircle" class="progress-ring__circle"
+                                        r="${radius}" cx="90" cy="90"
+                                        stroke-dasharray="${circumference}"
+                                        stroke-dashoffset="${circumference}" />
+                            </svg>
+                            <div class="timer-text" id="timerText">${formatTime(timerRemaining)}</div>
                          </div>
-                         <div style="text-align: center;">
-                             <button class="btn btn-primary" id="startBtn">Старт</button>
+                         <div class="button-container"> <button class="btn btn-primary" id="startBtn">Старт</button>
                              <button class="btn btn-secondary" id="pauseBtn" disabled>Пауза</button>
                              <button class="btn btn-danger" id="skipBtn">Пропустить</button>
                          </div>`;
-            } else if (exercise.type === "manual") {
-                html += `<div style="text-align:center; margin:20px 0;">
-                           <button class="btn btn-primary" id="completeBtn">Завершить</button>
-                           <button class="btn btn-danger" id="skipBtn">Пропустить</button>
+            }
+            // Если упражнение с ручным завершением
+            else if (exercise.type === "manual") {
+                html += `<div class="button-container"> <button class="btn btn-primary" id="completeBtn">Завершить</button>
+                            <button class="btn btn-danger" id="skipBtn">Пропустить</button>
                          </div>`;
             }
 
-            exerciseCard.innerHTML = html;
-            attachEventListeners(); // Прикрепляем обработчики
-            updateTimerDisplay();   // Обновляем дисплей
+            exerciseCard.innerHTML = html; // Вставляем HTML в карточку
+            attachEventListeners(); // Прикрепляем обработчики к новым кнопкам
+            updateTimerDisplay();   // Обновляем дисплей таймера (на случай, если он есть)
 
-            exerciseCard.classList.remove('fade-out');
-        }, 300);
+            exerciseCard.classList.remove('fade-out'); // Показываем карточку плавно
+        }, 300); // Задержка соответствует transition в CSS
     }
 
-    /**
-     * Прикрепление обработчиков событий (без изменений в логике кнопок)
-     */
+    /** Прикрепляет обработчики событий к кнопкам текущего упражнения. */
     function attachEventListeners() {
         const exercise = exercises[currentExerciseIndex];
+        if (!exercise) return; // Выходим, если упражнения нет
+
         const startBtn = document.getElementById("startBtn");
         const pauseBtn = document.getElementById("pauseBtn");
         const skipBtn = document.getElementById("skipBtn");
         const completeBtn = document.getElementById("completeBtn");
 
+        // Общая функция для обработки взаимодействия (активация звука + проигрывание)
         const handleInteraction = (soundToPlay) => {
-            activateSound(); playSound(soundToPlay);
+            // Сначала активируем звук (если еще не сделано).
+            // activateSound сама вызовет playSound(sounds.click) при первом взаимодействии.
+            activateSound();
+            // Воспроизводим нужный звук *после* активации, если это не первый клик
+            // (при первом клике activateSound уже воспроизвела click)
+             if (soundToPlay !== sounds.click || interactionOccurred) { // Проверяем, чтобы не дублировать первый клик
+                 playSound(soundToPlay);
+             }
         };
 
+        // Обработчик кнопки "Старт/Продолжить"
         if (startBtn) {
             startBtn.addEventListener("click", () => {
-                handleInteraction(sounds.click); isTimerPaused = false;
-                startBtn.disabled = true; startBtn.textContent = "Старт";
-                if (pauseBtn) pauseBtn.disabled = false;
+                handleInteraction(sounds.click); // Активируем и играем клик (если нужно)
+                isTimerPaused = false; // Снимаем флаг паузы
+                startBtn.disabled = true; // Блокируем кнопку "Старт"
+                startBtn.textContent = "Старт"; // Возвращаем текст на случай "Продолжить"
+                if (pauseBtn) pauseBtn.disabled = false; // Разблокируем кнопку "Пауза"
+
+                // Запускаем соответствующий таймер
                 if (exercise.type === "timer") startTimer();
                 else if (exercise.type === "interval") startIntervalTimer();
             });
         }
+
+        // Обработчик кнопки "Пауза"
         if (pauseBtn) {
             pauseBtn.addEventListener("click", () => {
-                handleInteraction(sounds.click); isTimerPaused = true; clearTimer();
-                if (startBtn) { startBtn.textContent = "Продолжить"; startBtn.disabled = false; }
-                pauseBtn.disabled = true;
+                handleInteraction(sounds.click); // Играем клик
+                isTimerPaused = true; // Ставим флаг паузы
+                clearTimer(); // Останавливаем интервал таймера
+                if (startBtn) {
+                    startBtn.textContent = "Продолжить"; // Меняем текст кнопки "Старт"
+                    startBtn.disabled = false; // Разблокируем ее
+                }
+                pauseBtn.disabled = true; // Блокируем кнопку "Пауза"
             });
         }
+
+        // Обработчик кнопки "Пропустить"
         if (skipBtn) {
             skipBtn.addEventListener("click", () => {
-                handleInteraction(sounds.transition); clearTimer();
-                markExercise("пропущено"); nextExercise();
+                handleInteraction(sounds.transition); // Играем звук перехода
+                clearTimer(); // Останавливаем таймер, если был
+                markExercise("пропущено"); // Отмечаем как пропущенное
+                nextExercise(); // Переходим к следующему
             });
         }
+
+        // Обработчик кнопки "Завершить" (для ручного типа)
         if (completeBtn) {
             completeBtn.addEventListener("click", () => {
-                handleInteraction(sounds.transition);
-                markExercise("завершено"); nextExercise();
+                handleInteraction(sounds.transition); // Играем звук перехода
+                markExercise("завершено"); // Отмечаем как завершенное
+                nextExercise(); // Переходим к следующему
             });
         }
     }
 
-    /**
-     * Рендеринг финального экрана (Убрана кнопка сохранения, добавлен авто-вызов saveCompletion)
-     */
+    /** Отображает экран завершения тренировки. */
     function renderCompletion() {
-        clearTimer();
-        saveCompletion(); // <-- Автоматически сохраняем завершение СЕГОДНЯ
-        const html = `<h2>Тренировка завершена! <span style="font-size: 2em; vertical-align: middle;">🎉</span></h2>
-                      <p>Отличная работа! Прогресс за сегодня сохранен.</p>
-                      <div style="text-align: center; margin-top: 20px;">
+        clearTimer(); // На всякий случай останавливаем таймер
+        saveCompletion(); // <-- Автоматически сохраняем прогресс за СЕГОДНЯ
+
+        const html = `<h2>Тренировка завершена! <span style="font-size: 1.5em; vertical-align: middle;">🎉</span></h2>
+                      <p>Отличная работа! Прогресс за сегодня сохранен в истории.</p>
+                      <div class="button-container" style="margin-top: 1.5rem;">
                           <button class="btn btn-secondary" id="newWeekBtn">Начать заново</button>
+                          <button class="btn btn-primary" id="viewHistoryBtn">Посмотреть историю</button>
                       </div>`;
         exerciseCard.innerHTML = html;
-        launchConfetti();
-        // Обработчик только для кнопки "Начать заново"
-        document.getElementById("newWeekBtn").addEventListener("click", () => {
-             activateSound(); // На всякий случай
-             playSound(sounds.click);
-             resetWeek();
-        });
+        launchConfetti(); // Запускаем конфетти!
+
+        // Обработчик для кнопки "Начать заново"
+        const newWeekBtn = document.getElementById("newWeekBtn");
+        if (newWeekBtn) {
+             newWeekBtn.addEventListener("click", () => {
+                 // Используем handleInteraction для обработки звука
+                 const handleNewWeekInteraction = () => {
+                     activateSound();
+                     playSound(sounds.click);
+                     resetWeek(); // Начинаем сначала
+                 };
+                 handleNewWeekInteraction();
+             });
+        }
+
+         // Обработчик для кнопки "Посмотреть историю"
+         const viewHistoryBtn = document.getElementById("viewHistoryBtn");
+         if (viewHistoryBtn) {
+             viewHistoryBtn.addEventListener("click", () => {
+                  // Используем handleInteraction для обработки звука
+                 const handleHistoryInteraction = () => {
+                     activateSound();
+                     playSound(sounds.click);
+                     showHistoryView(); // Переключаемся на вкладку истории
+                 };
+                 handleHistoryInteraction();
+             });
+         }
     }
 
-
     /**
-     * Рендеринг статистики.
-     * @param {object} historyData - Объект с историей тренировок.
+     * Отображает статистику тренировок.
+     * @param {object} historyData - Объект с историей тренировок из localStorage.
      */
     function renderStatistics(historyData) {
         let totalCompletedDays = 0;
         let totalWeeksTracked = 0;
+        const validWeekKeys = []; // Сохраняем ключи валидных недель
 
+        // Считаем статистику только по валидным записям
         for (const weekKey in historyData) {
-            if (historyData.hasOwnProperty(weekKey)) {
+            // Проверяем, что ключ соответствует формату Matisse-WNN и есть массив daysCompleted
+            if (/^\d{4}-W\d{2}$/.test(weekKey) && historyData.hasOwnProperty(weekKey) && Array.isArray(historyData[weekKey].daysCompleted)) {
                 totalWeeksTracked++;
-                totalCompletedDays += historyData[weekKey].daysCompleted?.length || 0;
+                totalCompletedDays += historyData[weekKey].daysCompleted.length;
+                validWeekKeys.push(weekKey); // Добавляем валидный ключ
+            } else {
+                 console.warn(`[Statistics] Невалидная запись в истории пропущена: ${weekKey}`);
             }
         }
 
+        // Считаем среднее значение
         const averagePerWeek = totalWeeksTracked > 0
-            ? (totalCompletedDays / totalWeeksTracked).toFixed(1)
+            ? (totalCompletedDays / totalWeeksTracked).toFixed(1) // Округляем до 1 знака
             : 0;
 
         // Очищаем предыдущую статистику
         statisticsCard.innerHTML = '';
 
+        // Если нет данных для статистики
         if (totalCompletedDays === 0) {
-             statisticsCard.innerHTML = '<h3>Статистика</h3><p class="no-history">Пока нет данных для статистики.</p>';
-             return;
+            statisticsCard.innerHTML = '<h3>Статистика</h3><p class="no-history">Пока нет данных для статистики.</p>';
+            return;
         }
 
         // Генерируем HTML для статистики
-        let statsHtml = `<h3>Статистика</h3>
-                         <div class="statistics-grid">
-                           <div class="stat-item">
-                             <p>Всего тренировок</p>
-                             <span>${totalCompletedDays}</span>
-                           </div>
-                           <div class="stat-item">
-                             <p>Недель с активностью</p>
-                             <span>${totalWeeksTracked}</span>
-                           </div>
-                           <div class="stat-item">
-                             <p>В среднем за неделю</p>
-                             <span>${averagePerWeek}</span>
-                           </div>
-                         </div>`;
+        const statsHtml = `<h3>Статистика</h3>
+                           <div class="statistics-grid">
+                               <div class="stat-item">
+                                   <p>Всего тренировок</p>
+                                   <span>${totalCompletedDays}</span>
+                               </div>
+                               <div class="stat-item">
+                                   <p>Недель с активностью</p>
+                                   <span>${totalWeeksTracked}</span>
+                               </div>
+                               <div class="stat-item">
+                                   <p>В среднем за неделю</p>
+                                   <span>${averagePerWeek}</span>
+                               </div>
+                           </div>`;
         statisticsCard.innerHTML = statsHtml;
     }
 
 
     /**
-     * Рендеринг визуальной истории недель.
+     * Отображает визуальную историю недель с квадратиками.
      * @param {object} historyData - Объект с историей тренировок.
      */
     function renderHistoryWeeks(historyData) {
-        // Очищаем контейнер перед рендерингом
-        historyWeeksContainer.innerHTML = '';
+        historyWeeksContainer.innerHTML = ''; // Очищаем контейнер
 
-        const weekKeys = Object.keys(historyData).sort().reverse(); // Сортируем, чтобы новые недели были сверху
+        // Получаем ключи недель (YYYY-WNN) и сортируем их в обратном порядке (новые сверху)
+        const weekKeys = Object.keys(historyData)
+            .filter(key => /^\d{4}-W\d{2}$/.test(key) && historyData[key] && Array.isArray(historyData[key].daysCompleted)) // Фильтруем валидные ключи
+            .sort()
+            .reverse();
 
         if (weekKeys.length === 0) {
             historyWeeksContainer.innerHTML = '<p class="no-history">История тренировок пока пуста.</p>';
             return;
         }
 
-        const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']; // Названия дней
 
         weekKeys.forEach(weekKey => {
             const weekData = historyData[weekKey];
-            const startDate = new Date(weekData.startDate); // Дата понедельника
-             // Форматируем дату для заголовка недели
+            // Проверяем наличие startDate, если нет - пытаемся восстановить или пропускаем
+            let startDate;
+            if (weekData.startDate) {
+                startDate = new Date(weekData.startDate);
+                 // Проверка на валидность даты
+                 if (isNaN(startDate.getTime())) {
+                     console.warn(`[History] Невалидная startDate для недели ${weekKey}, неделя пропущена.`);
+                     return; // Пропускаем эту неделю
+                 }
+            } else {
+                 // Попытка восстановить startDate из ключа
+                 try {
+                    const [year, weekNo] = weekKey.split('-W').map(Number);
+                    startDate = getStartOfWeek(year, weekNo);
+                 } catch (e) {
+                     console.warn(`[History] Не удалось восстановить startDate для недели ${weekKey}, неделя пропущена.`);
+                     return; // Пропускаем эту неделю
+                 }
+            }
+
+
+            // Форматируем дату для заголовка недели
             const endDate = new Date(startDate);
             endDate.setDate(startDate.getDate() + 6); // Дата воскресенья
+            // 'short' для месяца (янв, фев), 'numeric' для дня
             const options = { month: 'short', day: 'numeric' };
             const weekLabel = `${startDate.toLocaleDateString('ru-RU', options)} - ${endDate.toLocaleDateString('ru-RU', options)}, ${startDate.getFullYear()}`;
 
-
+            // Создаем div для записи недели
             const weekEntryDiv = document.createElement('div');
             weekEntryDiv.className = 'week-entry';
 
+            // Собираем HTML для недели
             let weekHtml = `<div class="week-header"><span>${weekLabel}</span></div>
                             <div class="week-day-names">`;
-            // Добавляем названия дней недели
+            // Добавляем названия дней
             dayNames.forEach(name => weekHtml += `<div>${name}</div>`);
             weekHtml += `</div><div class="week-squares">`;
 
-            // Создаем 7 квадратиков
-            for (let i = 0; i < 7; i++) {
+            // Создаем 7 квадратиков для дней недели
+            for (let i = 0; i < 7; i++) { // i от 0 (Пн) до 6 (Вс)
+                // Проверяем, завершен ли день (есть ли i в массиве daysCompleted)
                 const isCompleted = weekData.daysCompleted?.includes(i);
+                // Добавляем div квадратика с классом 'completed', если день завершен
                 weekHtml += `<div class="day-square ${isCompleted ? 'completed' : ''}"></div>`;
             }
 
-            weekHtml += `</div>`; // Закрываем week-squares
-            weekEntryDiv.innerHTML = weekHtml;
-            historyWeeksContainer.appendChild(weekEntryDiv);
+            weekHtml += `</div>`; // Закрываем .week-squares
+            weekEntryDiv.innerHTML = weekHtml; // Вставляем HTML в div недели
+            historyWeeksContainer.appendChild(weekEntryDiv); // Добавляем div недели в контейнер
         });
     }
 
-    /**
-     * Показ вида истории (вызывает рендеринг статистики и недель)
-     */
+    /** Показывает вкладку "История", загружает и отображает данные. */
     function showHistoryView() {
+        // Обновляем классы активности для навигации
         navHistory.classList.add("active");
         navExercise.classList.remove("active");
+        // Скрываем вид упражнений и показываем вид истории
         exerciseView.classList.add("hidden");
         historyView.classList.remove("hidden");
 
-        // Загружаем данные и рендерим историю + статистику
+        // Загружаем данные из localStorage
         let historyData = {};
         try {
-            historyData = JSON.parse(localStorage.getItem("exerciseHistory")) || {};
+            const storedHistory = localStorage.getItem("exerciseHistory");
+            if (storedHistory) {
+                historyData = JSON.parse(storedHistory);
+                 if (typeof historyData !== 'object' || historyData === null) {
+                     historyData = {}; // Сброс, если данные некорректны
+                 }
+            }
         } catch (e) {
-            console.error("Ошибка чтения истории из localStorage:", e);
+            console.error("[History] Ошибка чтения или парсинга истории из localStorage:", e);
+            // Показываем сообщение об ошибке в интерфейсе
             historyWeeksContainer.innerHTML = '<p class="no-history">Ошибка загрузки истории.</p>';
             statisticsCard.innerHTML = '<p class="no-history">Ошибка загрузки статистики.</p>';
-            return;
+            return; // Прерываем выполнение, так как данных нет
         }
 
-        renderStatistics(historyData); // Рендерим статистику
-        renderHistoryWeeks(historyData); // Рендерим недели
+        // Отображаем статистику и историю недель
+        renderStatistics(historyData);
+        renderHistoryWeeks(historyData);
     }
 
-     /**
-      * Показ вида упражнений (без изменений)
-      */
-     function showExerciseView() {
+    /** Показывает вкладку "Текущая неделя" (упражнения). */
+    function showExerciseView() {
         navExercise.classList.add("active");
         navHistory.classList.remove("active");
         exerciseView.classList.remove("hidden");
         historyView.classList.add("hidden");
-     }
+        // Не нужно перерисовывать упражнение, если оно уже было отрисовано
+    }
 
-    // --- Навигация (обработчики кликов без изменений, кроме вызова playSound) ---
+    // --- Навигация ---
     navExercise.addEventListener("click", (e) => {
-      e.preventDefault();
-      activateSound(); playSound(sounds.click);
-      showExerciseView();
+        e.preventDefault(); // Предотвращаем переход по ссылке href="#"
+        // Обработка звука через handleInteraction
+        const handleNavInteraction = () => {
+            activateSound();
+            playSound(sounds.click);
+            showExerciseView(); // Показываем вид упражнений
+        };
+        handleNavInteraction();
     });
+
     navHistory.addEventListener("click", (e) => {
-      e.preventDefault();
-      activateSound(); playSound(sounds.click);
-      showHistoryView();
+        e.preventDefault();
+         // Обработка звука через handleInteraction
+        const handleNavInteraction = () => {
+            activateSound();
+            playSound(sounds.click);
+            showHistoryView(); // Показываем вид истории
+        };
+        handleNavInteraction();
     });
 
 
     // --- Инициализация приложения ---
-    renderExercise(); // Показываем первое упражнение при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+        // Устанавливаем начальные значения для круга прогресса (если он есть при первой загрузке)
+        const initialCircle = document.getElementById("progressCircle");
+        if(initialCircle) {
+            initialCircle.style.strokeDasharray = circumference;
+            initialCircle.style.strokeDashoffset = circumference; // Начинаем с пустого круга
+        }
+        renderExercise(); // Показываем первое упражнение при загрузке
+
+        // Удаляем старые слушатели активации звука, т.к. активация теперь происходит
+        // внутри обработчиков событий кнопок через handleInteraction -> activateSound
+        // document.body.addEventListener('click', activateSound, { once: true });
+        // document.body.addEventListener('touchstart', activateSound, { once: true });
+    });
 
   </script>
 </body>
